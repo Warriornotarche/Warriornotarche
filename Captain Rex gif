@@ -1,0 +1,51 @@
+ # Constants for breathing animation
+NUM_FRAMES = 20
+SCALE_FACTOR = 0.05
+SNOW_DENSITY = 100
+
+def create_breathing_frames_v2(image, num_frames=NUM_FRAMES, scale_factor=SCALE_FACTOR):
+    frames = []
+    width, height = image.size
+
+    for i in range(num_frames):
+        scale = 1 + scale_factor * np.sin(2 * np.pi * i / num_frames)
+        new_width = int(width * scale)
+        new_height = int(height * scale)
+
+        resized_image = image.resize((new_width, new_height), Image.LANCZOS)
+        new_image = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+        new_image.paste(resized_image, ((width - new_width) // 2, (height - new_height) // 2))
+
+        frames.append(new_image)
+
+    return frames
+
+def add_snow_effect_v2(frames, snow_density=SNOW_DENSITY):
+    snow_frames = []
+    width, height = frames[0].size
+
+    for frame in frames:
+        snow_frame = frame.copy()
+        draw = ImageDraw.Draw(snow_frame)
+
+        for _ in range(snow_density):
+            x = np.random.randint(0, width)
+            y = np.random.randint(0, height)
+            size = np.random.randint(1, 4)
+            draw.ellipse((x, y, x+size, y+size), fill=(255, 255, 255, 255))
+
+        snow_frames.append(snow_frame)
+
+    return snow_frames
+
+# Create breathing frames
+breathing_frames_v2 = create_breathing_frames_v2(image)
+
+# Add snow effect
+snowy_breathing_frames_v2 = add_snow_effect_v2(breathing_frames_v2)
+
+# Save frames as GIF
+output_path_v2 = "/mnt/data/captain_rex_breathing_snow_v2.gif"
+snowy_breathing_frames_v2[0].save(output_path_v2, save_all=True, append_images=snowy_breathing_frames_v2[1:], duration=100, loop=0)
+
+output_path_v2
